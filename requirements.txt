@@ -1,0 +1,4 @@
+psutil
+tkinter
+psutil
+prettytable
