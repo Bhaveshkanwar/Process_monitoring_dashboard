@@ -30,8 +30,6 @@ class ProcessMonitor:
                 pid = proc.info['pid']
                 name = proc.info['name']
                 cpu = proc.info['cpu_percent']
-                #memory = proc.info['memory_info'].rss / (1024 * 1024)  # Convert to MB
-                #self.tree.insert("", "end", values=(pid, name, cpu, round(memory, 2)))
                 #Check if memory_info is None before accessing rss
                 memory_info = proc.info.get('memory_info')
                 memory = round(memory_info.rss / (1024 * 1024), 2) if memory_info else 0.0
