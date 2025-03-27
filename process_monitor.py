@@ -25,11 +25,15 @@ def display_process_info():
             try:
                 pid = proc.info['pid']
                 name = proc.info['name']
-                cpu = proc.info['cpu_percent']
-                memory = format_memory(proc.info['memory_info'].rss)
                 status = proc.info['status']
                 threads = proc.info['num_threads']
-
+                proc.cpu_percent(interval=0.1)
+                cpu = proc.cpu_percent()
+                memory_info=proc.info.get('memory_info')
+                if memory_info is not None:
+                    memory = format_memory(proc.info['memory_info'].rss)
+               else:
+                    memory="N/A"
                 table.add_row([pid, name, cpu, memory, status, threads])
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
