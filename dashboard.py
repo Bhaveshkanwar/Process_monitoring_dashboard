@@ -78,6 +78,64 @@ class ProcessMonitor:
         # Schedule next update
         self.root.after(1000, self.update_processes)
 
+        
+    def update_graphs(self):
+        #Updates CPU & Memory Usage Graphs.
+        self.cpu_data.append(psutil.cpu_percent())
+        self.memory_data.append(psutil.virtual_memory().percent)
+
+        if len(self.cpu_data) > 20:
+            self.cpu_data.pop(0)
+            self.memory_data.pop(0)
+
+        self.axs[0].clear()
+        self.axs[1].clear()
+        self.axs[0].plot(self.cpu_data, color='red')
+        self.axs[1].plot(self.memory_data, color='blue')
+        self.axs[0].set_title("CPU Usage (%)")
+        self.axs[1].set_title("Memory Usage (%)")
+        self.canvas.draw()
+
+        self.root.after(1000, self.update_graphs)
+
+    def search_process(self):
+        #Search for a process by name or PID.
+        query = self.search_var.get().lower()
+        for row in self.tree.get_children():
+            values = self.tree.item(row, "values")
+            if query in str(values).lower():
+                self.tree.selection_set(row)
+                self.tree.focus(row)
+                return
+
+        messagebox.showinfo("Search", "Process not found!")
+
+    def sort_column(self, column):
+        #Sorts the table based on the selected column.
+        data = [(self.tree.set(child, column), child) for child in self.tree.get_children()]
+        data.sort(reverse=True if column == "CPU" or column == "Memory" else False)
+
+        for index, (val, child) in enumerate(data):
+            self.tree.move(child, "", index)
+
+    def kill_selected_process(self):
+        #Terminates the selected process.
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Warning", "Please select a process to terminate!")
+            return
+
+        process_info = self.tree.item(selected_item, "values")
+        pid = int(process_info[0])
+
+        try:
+            os.kill(pid, signal.SIGTERM)
+            messagebox.showinfo("Success", f"Process {pid} terminated successfully.")
+        except (PermissionError, ProcessLookupError):
+            messagebox.showerror("Error", "Failed to terminate process.")
+
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()
